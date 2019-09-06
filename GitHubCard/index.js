@@ -2,14 +2,6 @@
            (replacing the palceholder with your Github name):
            https://api.github.com/users/<your name>
 */
-axios
-  .get('https://api.github.com/users/A-Lawrence-Reynolds')
-  .then(response => {
-    console.log(response);
-
-  })
-  .catch((error) => console.error('bad!'));
-
 
 /* Step 2: Inspect and study the data coming back, this is YOUR 
    github info! You will need to understand the structure of this 
@@ -32,8 +24,6 @@ axios
           user, and adding that card to the DOM.
 */
 
-const followersArray = [];
-
 /* Step 3: Create a function that accepts a single object as its only argument,
           Using DOM methods and properties, create a component that will return the following DOM element:
 
@@ -53,6 +43,111 @@ const followersArray = [];
 </div>
 
 */
+
+function cardMaker(data) {
+  const card = document.createElement('div');
+  card.classList.add('card');
+
+  const img = document.createElement('img');
+  img.setAttribute('src', data.avatar_url);
+  card.appendChild(img);
+
+  const cardInfo = document.createElement('div');
+  cardInfo.classList.add('card-info');
+
+  const name = document.createElement('h3');
+  name.classList.add('name');
+  name.textContent = data.name;
+  cardInfo.appendChild(name);
+
+  const username = document.createElement('p');
+  username.classList.add('username');
+  username.textContent = data.login;
+  cardInfo.appendChild(username);
+
+  const location = document.createElement('p');
+  location.classList.add('location');
+  location.textContent = data.location;
+  cardInfo.appendChild(location);
+
+  const profile = document.createElement('p');
+  profile.textContent = 'Profile: ';
+  cardInfo.appendChild(profile);
+
+  const address = document.createElement('a');
+  address.setAttribute('href', data.html_url);
+  address.textContent = data.html_url;
+  profile.appendChild(address);
+
+  const followers = document.createElement('p');
+  followers.textContent = 'Followers: ';
+  followers.textContent += data.followers;
+  cardInfo.appendChild(followers);
+
+  const following = document.createElement('p');
+  following.textContent = 'Following: ';
+  following.textContent += data.following;
+  cardInfo.appendChild(following);
+
+  const bio = document.createElement('p');
+  bio.textContent = 'Bio: ';
+  bio.textContent += data.bio;
+  cardInfo.appendChild(bio);
+
+  card.appendChild(cardInfo);
+
+  return card;
+}
+
+async function fetchGithubData() {
+  container = document.querySelector('.cards');
+
+  // bad unreadable code, short NOT better
+
+  // try {
+  //   const profile = (await axios.get('https://api.github.com/users/isaiahgrey93')).data;
+  //   [profile].concat((await (Promise.all((await axios.get(profile.followers_url)).data.map(async follower => (await axios.get(follower.url)).data))))).map(person => container.appendChild(cardMaker(person)))
+  // } catch (e) {
+  //   console.log('bad!')
+  // }
+
+  axios
+    .get('https://api.github.com/users/A-Lawrence-Reynolds')
+    .then((profileResponse) => {
+      const meCard = cardMaker(profileResponse.data);
+      container.appendChild(meCard);
+
+      return axios
+        .get(profileResponse.data.followers_url)
+    })
+    .then((followersResponse) => {
+      followersResponse.data.forEach(follower => {
+        axios
+          .get(follower.url)
+          .then((followerResponse) => {
+            const followerCard = cardMaker(followerResponse.data);
+            container.appendChild(followerCard);
+          })
+          .catch((error) => {
+            console.error('bad!');
+          });
+      })
+    })
+    .catch((error) => {
+      console.error('bad!');
+    });
+}
+
+window.addEventListener('load', () => {
+  fetchGithubData()
+})
+
+
+
+
+
+
+
 
 /* List of LS Instructors Github username's: 
   tetondan
