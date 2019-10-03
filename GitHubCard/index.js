@@ -46,6 +46,101 @@ const followersArray = [];
 
 */
 
+function cardMaker(data) {
+  const card = document.createElement("div");
+  card.classList.add("card");
+
+  const img = document.createElement("img");
+  img.setAttribute("src", data.avatar_url);
+  card.appendChild(img);
+
+  const cardInfo = document.createElement("div");
+  cardInfo.classList.add("card-info");
+
+  const name = document.createElement("h3");
+  name.classList.add("name");
+  name.textContent = data.name;
+  cardInfo.appendChild(name);
+
+  const username = document.createElement("p");
+  username.classList.add("username");
+  username.textContent = data.username;
+  cardInfo.appendChild(username);
+
+  const location = document.createElement("p");
+  location.textContent = data.location;
+  cardInfo.appendChild(location);
+
+  const profile = document.createElement("p");
+  profile.textContent = "Profile: ";
+  cardInfo.appendChild(profile);
+
+  const address = document.createElement("a");
+  address.setAttribute("href", data.html_url);
+  address.textContent = data.html_url;
+  profile.appendChild(address);
+
+  const followers = document.createElement("p");
+  followers.textContent = "Followers: ";
+  followers.textContent += data.followers;
+  cardInfo.appendChild(followers);
+
+  const following = document.createElement("p");
+  following.textContent = "Following: ";
+  following.textContent += data.following;
+  cardInfo.appendChild(following);
+
+  const repos = document.createElement("p");
+  repos.textContent = "Repositories: ";
+  repos.textContent += data.public_repos;
+  cardInfo.appendChild(repos);
+
+  const lastUpdate = document.createElement("p");
+  lastUpdate.textContent = "Last Active On: ";
+  lastUpdate.textContent += data.updated_at;
+  cardInfo.appendChild(lastUpdate);
+
+  const bio = document.createElement("p");
+  bio.textContent = "Bio: ";
+  bio.textContent += data.bio;
+  cardInfo.appendChild(bio);
+
+  card.appendChild(cardInfo);
+
+  return card;
+}
+
+function fetchGitHubData() {
+  container = document.querySelector(".cards");
+
+  axios
+    .get("https://api.github.com/users/A-Lawrence-Reynolds")
+    .then(profileRespone => {
+      console.log(profileRespone);
+      const myCard = cardMaker(profileRespone.data);
+      container.appendChild(myCard);
+      return axios.get(profileRespone.data.followers_url);
+    })
+    .then(followersResponse => {
+      followersResponse.data.forEach(follower => {
+        axios
+          .get(follower.url)
+          .then(followersResponse => {
+            const followerCard = cardMaker(followersResponse.data);
+            container.appendChild(followerCard);
+          })
+          .catch(error => {
+            console.error("bad!");
+          });
+      });
+    })
+    .catch(error => {
+      console.error("bad!");
+    });
+}
+window.addEventListener("load", () => {
+  fetchGitHubData();
+});
 /* List of LS Instructors Github username's: 
   tetondan
   dustinmyers
